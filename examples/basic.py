@@ -1,6 +1,6 @@
-from main import Frame
+from heorot.heorot import Hall
 
-class Basic(Frame):
+class Basic(Hall):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

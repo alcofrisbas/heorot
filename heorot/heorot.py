@@ -1,5 +1,5 @@
 import socket
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote, unquote_plus, parse_qs
 
 """
 A basic packet class for easy string sending.
@@ -30,7 +30,7 @@ class Packet:
 
 
 
-class Frame:
+class Hall:
     def __init__(self, hostname='', port=8080):
         self.port = port
         self.hostname = hostname
@@ -41,7 +41,11 @@ class Frame:
 
     def parseUrl(self, url):
         o = urlparse(url)
-        return  o.path, o.query.split("&")
+        queryList = o.query.split("&")
+        queryDict = parse_qs(o.query)
+        for q in queryDict:
+            queryDict[q] = queryDict[q][0]
+        return  o.path, queryDict
 
 
     def run(self):
@@ -54,12 +58,16 @@ class Frame:
                 c, addr = self.s.accept()
 
                 msg = c.recvmsg(4096)
+                # print(msg)
                 msg = msg[0].decode("utf-8").split(" ")[1][1:]
-
 
                 path, query = self.parseUrl(msg)
 
-                packet = Packet(response_body=self.handle(path, query))
+                response_body, status, headers = self.handle(path, query)
+
+                packet = Packet(response_body=response_body)
+                packet.status = status
+                packet.response_headers.update(headers)
                 c.sendall(packet.encode())
                 c.close()
             except KeyboardInterrupt:
@@ -69,7 +77,7 @@ class Frame:
 
     def handle(self, path, query):
         response_body=['<h1>I am not yet implemented</h1>']
-        return response_body
+        return response_body, 200, {}
 
 if __name__ == '__main__':
     frame = Frame()
