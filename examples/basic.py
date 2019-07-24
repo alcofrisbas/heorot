@@ -22,7 +22,7 @@ class Basic(Hall):
             s = self.homepage()
         elif path == "next/":
             s = self.nextpage()
-        return [s]
+        return s
 
 if __name__ == '__main__':
     b = Basic()
