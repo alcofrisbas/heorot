@@ -1,4 +1,6 @@
-from heorot.heorot import Hall
+from heorot.heorot import Hall, match_path
+
+# no additional paths: ^user/[^/]*/update/?$
 
 class Basic(Hall):
     def __init__(self, **kwargs):
@@ -15,33 +17,35 @@ class Basic(Hall):
         <input type="text" name="lastname">
         <input type="submit" value="Submit">
         </form>
+        <a href="next/">view all</a>
         """
 
     def handle_home_form(self, qd):
-        print("HANDLE")
         self.inmemory["names"].append((qd["firstname"], qd["lastname"]))
+        #redirect to home
         s, _, __  =self.handle('', {})
-        ret = "".join(s)
-        return ret
+        return s
 
     def nextpage(self):
         s =  """
         <h2>next</h2>{}
-        <a href="..">home</a>
+        <a href="/">home</a>
         """.format("\n".join(["<p>{}   {}</p>".format(i[0], i[1]) for i in self.inmemory["names"]]))
         return s
 
     def handle(self, path, query):
         s = ""
         status = 200
-        if path == "":
-            print("handling home: {}".format(str(query)))
+        print(path)
+        if match_path(path, ""):
+            print("matching home")
             s = self.homepage()
-        elif path == "next":
+        elif match_path(path, "next/?"):
+            print("matching next")
             s = self.nextpage()
         elif path=="handle-home-form":
             s = self.handle_home_form(query)
-        return [s], 200, {}
+        return s, 200, {}
 
 if __name__ == '__main__':
     b = Basic()
