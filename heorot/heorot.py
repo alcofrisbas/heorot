@@ -5,7 +5,7 @@ from urllib.parse import urlparse, unquote, unquote_plus, parse_qs
 A basic packet class for easy string sending.
 """
 class Packet:
-    def __init__(self, response_body=[]):
+    def __init__(self, response_body=""):
         # set up headers
         self.response_headers = {
             'Content-Type': 'text/html; encoding=utf8',
@@ -19,16 +19,21 @@ class Packet:
 
     # encode for sending and concat all data
     def encode(self,encoding="utf-8"):
-        response_body_raw = ''.join(self.response_body)
-        self.response_headers['Content-Length'] = len(response_body_raw)
+        self.response_headers['Content-Length'] = len(self.response_body)
         response_headers_raw = ''.join('%s: %s\n' % (k, v) for k, v in \
                                self.response_headers.items())
         proto = self.response_proto + " " + self.response_status + ' ' + self.response_status_text + "\n"
 
-        s = proto + response_headers_raw + "\n" + response_body_raw
+        s = proto + response_headers_raw + "\n" + self.response_body
         return s.encode(encoding)
 
-
+def parse_url(url):
+    o = urlparse(url)
+    queryList = o.query.split("&")
+    queryDict = parse_qs(o.query)
+    for q in queryDict:
+        queryDict[q] = queryDict[q][0]
+    return  o.path, queryDict
 
 class Hall:
     def __init__(self, hostname='', port=8080):
@@ -37,16 +42,6 @@ class Hall:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # so you can reboot quicker
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
-
-    def parseUrl(self, url):
-        o = urlparse(url)
-        queryList = o.query.split("&")
-        queryDict = parse_qs(o.query)
-        for q in queryDict:
-            queryDict[q] = queryDict[q][0]
-        return  o.path, queryDict
-
 
     def run(self):
         self.s.bind((self.hostname, self.port))
