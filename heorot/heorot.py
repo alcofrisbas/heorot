@@ -1,6 +1,6 @@
 import socket
-from urllib.parse import urlparse, unquote, unquote_plus, parse_qs
 import re
+from .utils import parse_url
 
 """
 A basic packet class for easy string sending.
@@ -28,16 +28,6 @@ class Packet:
         s = proto + response_headers_raw + "\n" + self.response_body
         return s.encode(encoding)
 
-def parse_url(url):
-    o = urlparse(url)
-    queryList = o.query.split("&")
-    queryDict = parse_qs(o.query)
-    for q in queryDict:
-        queryDict[q] = queryDict[q][0]
-    return  o.path, queryDict
-
-def match_path(path, target):
-    return re.match(path, target)
 
 class Hall:
     def __init__(self, hostname='', port=8080):
@@ -57,6 +47,7 @@ class Hall:
                 c, addr = self.s.accept()
 
                 msg = c.recvmsg(4096)
+                # for debug...
                 # print(msg)
                 msg = msg[0].decode("utf-8").split(" ")[1][1:]
 
