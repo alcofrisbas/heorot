@@ -1,5 +1,6 @@
 import socket
 from urllib.parse import urlparse, unquote, unquote_plus, parse_qs
+import re
 
 """
 A basic packet class for easy string sending.
@@ -35,6 +36,9 @@ def parse_url(url):
         queryDict[q] = queryDict[q][0]
     return  o.path, queryDict
 
+def match_path(path, target):
+    return re.match(path, target)
+
 class Hall:
     def __init__(self, hostname='', port=8080):
         self.port = port
@@ -56,7 +60,7 @@ class Hall:
                 # print(msg)
                 msg = msg[0].decode("utf-8").split(" ")[1][1:]
 
-                path, query = self.parseUrl(msg)
+                path, query = parse_url(msg)
 
                 response_body, status, headers = self.handle(path, query)
 
