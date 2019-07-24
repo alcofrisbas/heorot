@@ -1,3 +1,3 @@
 # heorot
-a very lightweight web framework I made for fun during the summer
+a hilariously lightweight web framework I made for fun during the summer
 
