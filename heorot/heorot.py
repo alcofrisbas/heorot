@@ -64,6 +64,10 @@ class Hall:
                 break
         print("\nclosing connection on port {}".format(str(self.port)))
 
+    def view(self, template, d):
+        for key in d:
+            template = template.replace("[[{}]]".format(key), d[key])
+        return template
 
     def handle(self, path, query):
         response_body=['<h1>I am not yet implemented</h1>']
