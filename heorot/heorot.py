@@ -73,9 +73,5 @@ class Hall:
         return template
 
     def handle(self, path, query):
-        response_body=['<h1>I am not yet implemented</h1>']
-        return [(response_body, '200', {})]
-
-if __name__ == '__main__':
-    frame = Frame()
-    frame.run()
+        response_body='<h1>I am not yet implemented</h1>'
+        return response_body, '200', {}

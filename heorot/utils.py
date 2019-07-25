@@ -42,9 +42,3 @@ def _test_match(template, actual):
         print(p)
     else:
         print("not a match")
-
-if __name__ == '__main__':
-    # print (match_path_old("user/{name}/{action}/?$","user/ben/update/"))
-    _test_match("^user/{name}/{action}/?$","user/ben/update/")
-    _test_match("^.*/style.css","/next/style.css")
-    _test_match("^/?$","/")
