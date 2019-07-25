@@ -28,12 +28,24 @@ def match_path_keys(template, actual):
             d[i[1:-1]] = j
     return d
 
-def parse_url(url):
-    o = urlparse(url)
-    queryList = o.query.split("&")
-    queryDict = parse_qs(o.query)
+def sanitize(html):
+    # remove tags
+    html = re.sub("</?(.*?)>", "", html)
+    # remove comment open
+    html = re.sub("</?", "", html)
+    return html
+
+
+def parse_query(query):
+    queryList = query.split("&")
+    queryDict = parse_qs(query)
     for q in queryDict:
         queryDict[q] = queryDict[q][0]
+    return queryDict
+
+def parse_url(url):
+    o = urlparse(url)
+    queryDict = parse_query(o.query)
     return  o.path, queryDict
 
 def _test_match(template, actual):
