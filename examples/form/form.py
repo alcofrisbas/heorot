@@ -15,25 +15,14 @@ class Basic(Hall):
             t = r.read()
         return t
 
-    def style(self,tname):
+    def static(self,tname):
         with open(STATIC_DIR+tname) as r:
             t = r.read()
         return t
 
     def homepage(self):
-        css = self.style("style.css")
-        s =  """
-        <h1>home</h1>
-        <form action="handle-home-form">
-        First name:<br>
-        <input type="text" name="firstname" required><br>
-        Last name:<br>
-        <input type="text" name="lastname" required>
-        <input type="submit" value="Submit">
-        </form>
-        <a href="next/">view all</a>
-        """
-        d = {"style": css, "content":s}
+        s =  self.retrieve("home-form.html")
+        d = {"content":s}
         template = self.retrieve("header.html")
         return self.view(template, d)
 
@@ -49,21 +38,31 @@ class Basic(Hall):
         <h2>next</h2><table>{}</table>
         <a href="/">home</a>
         """.format("\n".join(["<tr><td>{}</td><td>{}</td></tr>".format(i[0], i[1]) for i in self.inmemory["names"]]))
-        css = self.style("style.css")
-        d = {"style": css, "content":s}
+        d = {"content":s}
         template = self.retrieve("header.html")
         return self.view(template, d)
 
     def handle(self, path, query):
         s = ""
-        status = 200
-        if match_path(path, "$"):
+        status = '200'
+        headers = {}
+        if match_path("^/?$", path):
+            print("match home")
             s = self.homepage()
-        elif match_path(path, "next/?$"):
+        elif match_path("next/?$", path):
+            print("match next")
             s = self.nextpage()
-        elif match_path(path,"handle-home-form/?$"):
+        elif match_path("handle-home-form/?$",path):
+            print("match form")
             s = self.handle_home_form(query)
-        return s, 200, {}
+        # match css
+        elif match_path(".*.css", path):
+            s = self.static(path.split("/")[-1])
+            headers["Content-Type"] = "text/css"
+        else:
+            print("did not match {}".format(path))
+            status = '404'
+        return s, status, headers
 
 if __name__ == '__main__':
     b = Basic()
