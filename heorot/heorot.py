@@ -11,7 +11,6 @@ class Packet:
         self.response_headers = {
             'Content-Type': 'text/html; encoding=utf8',
             'Content-Length': 0,
-            'Connection': 'close',
         }
         self.response_body = response_body
         self.response_proto = 'HTTP/1.1'
@@ -26,16 +25,18 @@ class Packet:
         proto = self.response_proto + " " + self.response_status + ' ' + self.response_status_text + "\n"
 
         s = proto + response_headers_raw + "\n" + self.response_body
+        # print(s)
         return s.encode(encoding)
 
 
 class Hall:
-    def __init__(self, hostname='', port=8080):
+    def __init__(self, hostname='', port=8080, debug=False):
         self.port = port
         self.hostname = hostname
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # so you can reboot quicker
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.debug=debug
 
     def run(self):
         self.s.bind((self.hostname, self.port))
@@ -45,19 +46,21 @@ class Hall:
         while True:
             try:
                 c, addr = self.s.accept()
-
                 msg = c.recvmsg(4096)
                 # for debug...
-                # print(msg)
+                if self.debug:
+                    print(msg)
                 msg = msg[0].decode("utf-8").split(" ")[1][1:]
 
                 path, query = parse_url(msg)
 
                 response_body, status, headers = self.handle(path, query)
+                print("receiving connection from {} : {}\t{}".format(addr[0], addr[1],path[:20]))
 
                 packet = Packet(response_body=response_body)
-                packet.status = status
                 packet.response_headers.update(headers)
+                packet.response_status = status
+
                 c.sendall(packet.encode())
                 c.close()
             except KeyboardInterrupt:
@@ -71,7 +74,7 @@ class Hall:
 
     def handle(self, path, query):
         response_body=['<h1>I am not yet implemented</h1>']
-        return response_body, 200, {}
+        return [(response_body, '200', {})]
 
 if __name__ == '__main__':
     frame = Frame()

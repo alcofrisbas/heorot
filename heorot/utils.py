@@ -36,10 +36,15 @@ def parse_url(url):
         queryDict[q] = queryDict[q][0]
     return  o.path, queryDict
 
-if __name__ == '__main__':
-    # print (match_path_old("user/{name}/{action}/?$","user/ben/update/"))
-    p = match_path_keys("user/{name}/{action}/?$","user/ben/update/")
+def _test_match(template, actual):
+    p = match_path(template,actual)
     if p:
         print(p)
     else:
         print("not a match")
+
+if __name__ == '__main__':
+    # print (match_path_old("user/{name}/{action}/?$","user/ben/update/"))
+    _test_match("^user/{name}/{action}/?$","user/ben/update/")
+    _test_match("^.*/style.css","/next/style.css")
+    _test_match("^/?$","/")
