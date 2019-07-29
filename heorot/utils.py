@@ -54,3 +54,12 @@ def _test_match(template, actual):
         print(p)
     else:
         print("not a match")
+
+def redirect(request, path):
+    request.path = path
+    return request
+
+def retrieve(fname):
+    with open(fname) as r:
+        t = r.read()
+    return t

@@ -1,6 +1,7 @@
 import socket
 import re
 from .utils import parse_url
+from .decorators import view
 
 # pretty colors
 red = "\033[1;31m"
@@ -8,6 +9,8 @@ green = "\033[1;32m"
 yellow = "\033[1;33m"
 blue = "\033[1;34m"
 defcol = "\033[0m"
+
+
 
 
 class Packet:
@@ -44,6 +47,12 @@ class Request:
         self.content = content
         self.method = method
 
+class Response:
+    def __init__(self, response_body, status, headers):
+        self.body = response_body
+        self.status = status
+        self.headers = headers
+
 
 class Messenger:
     def __init__(self, **kwargs):
@@ -59,11 +68,9 @@ class Hall:
         self.port = port
         self.hostname = hostname
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # so you can reboot quicker
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.debug=debug
-        self.TEMPLATE_DIR = "template/"
-        self.STATIC_DIR = "static/"
+        self.mapping = [("^/?$", self.base_home)]
 
 
     def run(self):
@@ -92,12 +99,12 @@ class Hall:
 
                 request = Request(path, query, content,method)
 
-                response_body, status, headers = self.handle(request)
+                response = self.handle(request)
                 print("receiving connection from {}{} : {}\t{}{}".format(green,addr[0], addr[1],path[:20], defcol))
 
-                packet = Packet(response_body=response_body)
-                packet.response_headers.update(headers)
-                packet.response_status = status
+                packet = Packet(response_body=response.body)
+                packet.response_headers.update(response.headers)
+                packet.response_status = response.status
 
                 c.sendall(packet.encode())
                 c.close()
@@ -105,15 +112,12 @@ class Hall:
                 break
         print("\nclosing connection on port {}".format(str(self.port)))
 
-    def view(self, template, d):
-        """
-        Fills a template with a dictionary
-        :param: template str
-        :param: d dict
-        """
-        for key in d:
-            template = template.replace("[[{}]]".format(key), d[key])
-        return template
+
+    @view(None, None)
+    def base_home(self, request):
+        return {"content":"<h1>Hall not yet implemented</h1>"}
+
+
 
     def handle(self, request):
         """
@@ -122,23 +126,11 @@ class Hall:
         :param: query dict
         :param content str
         """
-        response_body='<h1>I am not yet implemented</h1>'
-        return response_body, '200', {}
 
-    def retrieve(self,tname):
-        """
-        Retrieves a template from TEMPLATE_DIR
-        :param: tname str
-        """
-        with open(self.TEMPLATE_DIR+tname) as r:
-            t = r.read()
-        return t
+        response_body = ""
+        header = {}
+        for m in self.mapping:
+            if re.match(m[0], request.path):
+                response_body, header = m[1](request)
+        return Response(response_body, '200', header)
 
-    def static(self,tname):
-        """
-        Retrieves a static file from STATIC_DIR
-        :param: tname str
-        """
-        with open(self.STATIC_DIR+tname) as r:
-            t = r.read()
-        return t
