@@ -40,7 +40,7 @@ def parse_query(query):
     queryList = query.split("&")
     queryDict = parse_qs(query)
     for q in queryDict:
-        queryDict[q] = queryDict[q][0]
+        queryDict[q] = sanitize(queryDict[q][0])
     return queryDict
 
 def parse_url(url):

@@ -24,6 +24,7 @@ from heorot.heorot import Hall\n
 class {}(Hall):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        
 if __name__ == '__main__':
     n = {}()
     n.run()""".format(class_name(name), class_name(name))
