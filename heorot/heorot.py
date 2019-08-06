@@ -39,14 +39,13 @@ class Packet:
         # print(s)
         return s.encode(encoding)
 
-# not used yet.
 class Request:
     def __init__(self, path, query, content, method):
         self.path = path
         self.query = query
         self.content = content
         self.method = method
-
+# TODO:  incorporate with Packet class
 class Response:
     def __init__(self, response_body, status, headers):
         self.body = response_body
