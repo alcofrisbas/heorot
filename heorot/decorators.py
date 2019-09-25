@@ -15,14 +15,19 @@ class view:
     def __call__(self, control):
         def fw(*args):
             d = control(*args)
+            header = {"Content-Type": "text/html"}
+            if d.get("header"):
+                header.update(d["header"])
+            print(header)
             if not self.template or not self.doc:
-                return d["content"], {"Content-Type": "text/html"}
+                return d["content"], header
             template = _retrieve(self.template_dir + self.template)
             doc_content = _retrieve(self.template_dir + self.doc)
             for key in d:
-                doc_content = doc_content.replace("[[{}]]".format(key), d[key])
+                if key != "header":
+                    doc_content = doc_content.replace("[[{}]]".format(key), d[key])
             template = template.replace("[[doc_content]]", doc_content)
-            return template, {"Content-Type": "text/html"}
+            return template, header
         return fw
 
 class static:
@@ -36,3 +41,5 @@ class static:
             ret = _retrieve(self.static_dir+s)
             return ret, {"Content-Type": self.content_type}
         return fw
+
+

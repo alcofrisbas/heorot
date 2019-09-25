@@ -1,4 +1,4 @@
-from heorot.heorot2 import Hall, Response
+from heorot.heorot import Hall, Response
 from heorot.decorators import view, static
 from heorot.utils import redirect, parse_query
 

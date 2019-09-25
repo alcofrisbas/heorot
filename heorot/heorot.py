@@ -21,7 +21,7 @@ class Packet:
         # set up headers
         self.response_headers = {
             'Content-Type': 'text/html; encoding=utf8',
-            'Content-Length': 0,
+            'Content-Length': 0
         }
         self.response_body = response_body
         self.response_proto = 'HTTP/1.1'
@@ -36,15 +36,15 @@ class Packet:
         proto = self.response_proto + " " + self.response_status + ' ' + self.response_status_text + "\n"
 
         s = proto + response_headers_raw + "\n" + self.response_body
-        # print(s)
         return s.encode(encoding)
 
 class Request:
-    def __init__(self, path, query, content, method):
+    def __init__(self, path, query, content, method, header):
         self.path = path
         self.query = query
         self.content = content
         self.method = method
+        self.header = header
 # TODO:  incorporate with Packet class
 class Response:
     def __init__(self, response_body, status, headers):
@@ -59,7 +59,6 @@ class Messenger:
 
 
 class Hall:
-    #comment inline
     """
     Main framework class.
     """
@@ -87,6 +86,15 @@ class Hall:
                 # for debug...
                 if self.debug:
                     print(msg)
+                header = {}
+                try:
+                    for item in msg[0].decode("utf-8").strip().split("\r\n")[1:]:
+                        # print(item)
+                        head = [i.strip() for i in item.split(":")]
+                        header[head[0]] = head[1]
+                except:
+                    pass
+                # print(header)
                 url = msg[0].decode("utf-8").split(" ")[1][1:]
                 method = msg[0].decode("utf-8").split(" ")[0]
                 try:
@@ -96,7 +104,7 @@ class Hall:
 
                 path, query = parse_url(url)
 
-                request = Request(path, query, content,method)
+                request = Request(path, query, content,method, header)
 
                 response = self.handle(request)
                 print("receiving connection from {}{} : {}\t{}{}".format(green,addr[0], addr[1],path[:20], defcol))
